@@ -2,6 +2,7 @@ package cryptopals
 
 import (
 	"bytes"
+	"encoding/base64"
 	"encoding/hex"
 	"os"
 	"strings"
@@ -85,4 +86,26 @@ I go crazy when I hear a cymbal`
 	if !bytes.Equal(got, hexToByteSlice(t, want)) {
 		t.Fatalf("wrong repeating xor result; want %q, got %q", want, got)
 	}
+}
+
+func TestChallenge6(t *testing.T) {
+	if d := hammingDistance([]byte("this is a test"), []byte("wokka wokka!!!")); d != 37 {
+		t.Fatalf("wrong hamming distance; want %d, got %d", 37, d)
+	}
+
+	input := base64ToByteSlice(t, readFromFile("testdata/6.txt"))
+	scoring := generateScoringFromCorpus(corpus)
+	key := findRepeatingXORKey(input, scoring)
+	t.Logf("found key = %q", key)
+	t.Logf("decrypted message = \n%s", repeatingXOR(input, key))
+}
+
+func base64ToByteSlice(t *testing.T, bs string) []byte {
+	t.Helper()
+	bs = strings.ReplaceAll(bs, "\n", "")
+	b, err := base64.StdEncoding.DecodeString(bs)
+	if err != nil {
+		t.Fatalf("base64ToByteSlice: cannot decode bs; err = %v", err)
+	}
+	return b
 }

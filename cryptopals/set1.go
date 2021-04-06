@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"encoding/base64"
 	"encoding/hex"
+	"math"
+	"math/bits"
 	"unicode/utf8"
 )
 
@@ -12,7 +14,7 @@ func hexToBase64(hexString string) string {
 	if err != nil {
 		panic("hexToBase64: cannot decode hexString")
 	}
-	return base64.RawStdEncoding.EncodeToString(b)
+	return base64.StdEncoding.EncodeToString(b)
 }
 
 func xor(a, b []byte) []byte {
@@ -69,6 +71,51 @@ func repeatingXOR(in, key []byte) []byte {
 	res := make([]byte, len(in))
 	for i := 0; i < len(in); i++ {
 		res[i] = in[i] ^ key[i%len(key)]
+	}
+	return res
+}
+
+func findRepeatingXORKey(in []byte, scoring map[rune]float64) []byte {
+	var keySize int
+	minDistance := math.MaxInt64
+	for size := 2; size <= 40; size++ {
+		first := in[:size]
+		second := in[size : 2*size]
+		third := in[2*size : 3*size]
+		fourth := in[3*size : 4*size]
+		d := hammingDistance(first, second)
+		d += hammingDistance(first, third)
+		d += hammingDistance(first, fourth)
+		d += hammingDistance(second, third)
+		d += hammingDistance(second, fourth)
+		d += hammingDistance(third, fourth)
+		d /= 6    // average
+		d /= size // normalize
+		if d <= minDistance {
+			keySize = size
+			minDistance = d
+		}
+	}
+
+	// Every element contains a portion of the ciphertext that is encrypted
+	// with the same single-byte key.
+	blocks := make([][]byte, keySize)
+	for i := 0; i < len(in); i++ {
+		blocks[i%keySize] = append(blocks[i%keySize], in[i])
+	}
+
+	key := make([]byte, keySize)
+	for i, b := range blocks {
+		key[i] = findSingleXORKey(b, scoring)
+	}
+
+	return key
+}
+
+func hammingDistance(a, b []byte) int {
+	var res int
+	for _, x := range xor(a, b) {
+		res += bits.OnesCount8(x)
 	}
 	return res
 }
