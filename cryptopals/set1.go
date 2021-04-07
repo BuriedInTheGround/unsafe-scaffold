@@ -123,7 +123,7 @@ func hammingDistance(a, b []byte) int {
 }
 
 func decryptECB(in []byte, b cipher.Block) []byte {
-	if len(in)%b.BlockSize() > 0 {
+	if len(in)%b.BlockSize() != 0 {
 		panic("decryptECB: input length not a multiple of BlockSize")
 	}
 	res := make([]byte, len(in))
