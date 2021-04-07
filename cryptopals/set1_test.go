@@ -2,6 +2,7 @@ package cryptopals
 
 import (
 	"bytes"
+	"crypto/aes"
 	"encoding/base64"
 	"encoding/hex"
 	"os"
@@ -108,4 +109,26 @@ func base64ToByteSlice(t *testing.T, bs string) []byte {
 		t.Fatalf("base64ToByteSlice: cannot decode bs; err = %v", err)
 	}
 	return b
+}
+
+func TestChallenge7(t *testing.T) {
+	input := base64ToByteSlice(t, readFromFile("testdata/7.txt"))
+	key := []byte("YELLOW SUBMARINE")
+	b, err := aes.NewCipher(key)
+	if err != nil {
+		t.Fatalf("cannot initialize aes cipher; err = %v", err)
+	}
+	message := decryptECB(input, b)
+	t.Logf("decrypted message =\n%s", message)
+}
+
+func TestChallenge8(t *testing.T) {
+	data := readFromFile("testdata/8.txt")
+	inputs := strings.Split(data, "\n")
+	for i, input := range inputs {
+		if detectECB(hexToByteSlice(t, input)) {
+			t.Logf("detected ECB encrypted message at line #%d", i+1)
+		}
+	}
+	// The repeating part turns out to be "d880619740a8a19b7840a8a31c810a3d".
 }

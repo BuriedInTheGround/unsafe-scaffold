@@ -2,6 +2,8 @@ package cryptopals
 
 import (
 	"bytes"
+	"crypto/aes"
+	"crypto/cipher"
 	"encoding/base64"
 	"encoding/hex"
 	"math"
@@ -118,4 +120,32 @@ func hammingDistance(a, b []byte) int {
 		res += bits.OnesCount8(x)
 	}
 	return res
+}
+
+func decryptECB(in []byte, b cipher.Block) []byte {
+	if len(in)%b.BlockSize() > 0 {
+		panic("decryptECB: input length not a multiple of BlockSize")
+	}
+	res := make([]byte, len(in))
+	for i := 0; i < len(in); i += b.BlockSize() {
+		b.Decrypt(res[i:i+b.BlockSize()], in[i:i+b.BlockSize()])
+	}
+	return res
+}
+
+func detectECB(in []byte) bool {
+	if len(in)%aes.BlockSize > 0 {
+		return false // Should this thing panic() here instead?
+	}
+
+	foundBlocks := make(map[string]struct{})
+	for i := 0; i < len(in); i += aes.BlockSize {
+		hs := hex.EncodeToString(in[i : i+aes.BlockSize])
+		if _, ok := foundBlocks[hs]; ok {
+			return true
+		}
+		foundBlocks[hs] = struct{}{}
+	}
+
+	return false
 }
