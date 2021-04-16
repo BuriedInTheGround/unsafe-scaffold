@@ -18,6 +18,7 @@ int main() {
     uint8_t buf_s; // One-byte buffer.
 
     size_t ret = fread(&buf_s, 1, sizeof(buf_s), in); // Read 1-byte of data.
+    size_t idx = 1;
     while (!feof(in)) {
         // Check that the expected number of bytes was read.
         if (ret != sizeof(buf_s)) {
@@ -69,6 +70,12 @@ int main() {
             // next 6 bits from the UTF-8 codeword.
             codepoint <<= 6;
             for (size_t i = 1; i < utf8bytes-1; i++) {
+                // Check that the byte starts with the 2-bit string 10. The
+                // UTF-8 codeword is otherwise invalid.
+                if ((buf[i] & (3 << 6)) ^ (2 << 6)) {
+                    fprintf(stderr, "bad utf-8 codeword #%zu, byte #%zu: %#02x\n", idx, i+1, buf[i]);
+                    exit(EXIT_FAILURE);
+                }
                 // Put the least significant 6 bits of the i-th UTF-8 byte into
                 // the codepoint and do the left shift by 6 positions.
                 codepoint |= buf[i] ^ (2 << 6);
@@ -90,6 +97,7 @@ int main() {
         }
 
         ret = fread(&buf_s, 1, sizeof(buf_s), in); // Read the next 1-byte.
+        idx++;
     }
 
     fclose(in);
