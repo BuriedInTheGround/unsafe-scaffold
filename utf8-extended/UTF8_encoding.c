@@ -12,16 +12,19 @@ int main() {
     }
     if (out == NULL) {
         perror("fopen() for output file failed");
+        fclose(in);
         exit(EXIT_FAILURE);
     }
 
     uint32_t buf; // Buffer for reading the input file 4-bytes at a time.
 
-    size_t ret = fread(&buf, 1, sizeof(buf), in); // Read 4-bytes of data.
+    size_t ret = fread(&buf, sizeof(buf), 1, in); // Read 4-bytes of data.
     while (!feof(in)) {
         // Check that the expected number of bytes was read.
-        if (ret != sizeof(buf)) {
+        if (ret != 1) {
             fprintf(stderr, "fread() failed: %zu\n", ret);
+            fclose(in);
+            fclose(out);
             exit(EXIT_FAILURE);
         }
 
@@ -61,13 +64,15 @@ int main() {
         }
 
         // Write the resulting UTF-8 codeword into the output file.
-        size_t wet = fwrite(utf8e_v, sizeof(*utf8e_v), sizeof(utf8e_v), out);
-        if (wet != sizeof(utf8e_v)) {
+        size_t wet = fwrite(utf8e_v, sizeof(utf8e_v), sizeof(*utf8e_v), out);
+        if (wet != sizeof(*utf8e_v)) {
             fprintf(stderr, "fwrite() failed: %zu\n", wet);
+            fclose(in);
+            fclose(out);
             exit(EXIT_FAILURE);
         }
 
-        ret = fread(&buf, 1, sizeof(buf), in); // Read the next 4-bytes.
+        ret = fread(&buf, sizeof(buf), 1, in); // Read the next 4-bytes.
     }
 
     fclose(in);

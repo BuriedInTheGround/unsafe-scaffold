@@ -12,17 +12,20 @@ int main() {
     }
     if (out == NULL) {
         perror("fopen() for output file failed");
+        fclose(in);
         exit(EXIT_FAILURE);
     }
 
     uint8_t buf_s; // One-byte buffer.
 
-    size_t ret = fread(&buf_s, 1, sizeof(buf_s), in); // Read 1-byte of data.
+    size_t ret = fread(&buf_s, sizeof(buf_s), 1, in); // Read 1-byte of data.
     size_t idx = 1;
     while (!feof(in)) {
         // Check that the expected number of bytes was read.
-        if (ret != sizeof(buf_s)) {
+        if (ret != 1) {
             fprintf(stderr, "fread() failed: %zu\n", ret);
+            fclose(in);
+            fclose(out);
             exit(EXIT_FAILURE);
         }
 
@@ -30,6 +33,8 @@ int main() {
         int e = fseek(in, -1L, SEEK_CUR);
         if (e) {
             perror("fseek() failed");
+            fclose(in);
+            fclose(out);
             exit(EXIT_FAILURE);
         }
 
@@ -53,9 +58,11 @@ int main() {
         // at a time.
         uint8_t buf[utf8bytes];
 
-        ret = fread(buf, 1, sizeof(buf), in); // Read utf8bytes-bytes of data.
-        if (ret != sizeof(buf)) {
+        ret = fread(buf, sizeof(buf), 1, in); // Read utf8bytes-bytes of data.
+        if (ret != 1) {
             fprintf(stderr, "fread() failed: %zu\n", ret);
+            fclose(in);
+            fclose(out);
             exit(EXIT_FAILURE);
         }
 
@@ -72,8 +79,10 @@ int main() {
             for (size_t i = 1; i < utf8bytes-1; i++) {
                 // Check that the byte starts with the 2-bit string 10. The
                 // UTF-8 codeword is otherwise invalid.
-                if ((buf[i] & (3 << 6)) ^ (2 << 6)) {
+                if ((buf[i] & (3 << 6)) != (2 << 6)) {
                     fprintf(stderr, "bad utf-8 codeword #%zu, byte #%zu: %#02x\n", idx, i+1, buf[i]);
+                    fclose(in);
+                    fclose(out);
                     exit(EXIT_FAILURE);
                 }
                 // Put the least significant 6 bits of the i-th UTF-8 byte into
@@ -90,13 +99,15 @@ int main() {
         }
 
         // Write the resulting codepoint into the output file.
-        size_t wet = fwrite(&codepoint, 1, sizeof(codepoint), out);
-        if (wet != sizeof(codepoint)) {
+        size_t wet = fwrite(&codepoint, sizeof(codepoint), 1, out);
+        if (wet != 1) {
             fprintf(stderr, "fwrite() failed: %zu\n", wet);
+            fclose(in);
+            fclose(out);
             exit(EXIT_FAILURE);
         }
 
-        ret = fread(&buf_s, 1, sizeof(buf_s), in); // Read the next 1-byte.
+        ret = fread(&buf_s, sizeof(buf_s), 1, in); // Read the next 1-byte.
         idx++;
     }
 
