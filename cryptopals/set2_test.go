@@ -5,6 +5,8 @@ import (
 	"crypto/aes"
 	"math"
 	"testing"
+
+	"github.com/google/go-cmp/cmp"
 )
 
 func TestChallenge9(t *testing.T) {
@@ -69,6 +71,46 @@ dXN0IHRvIHNheSBoaQpEaWQgeW91IHN0b3A/IE5vLCBJIGp1c3QgZHJvdmUg
 YnkK`)
 	oracle := newECBSuffixOracle(want)
 	got := recoverECBSuffix(oracle)
+	t.Logf("secret suffix recovered =\n%s", got)
+	if !bytes.Equal(got, want) {
+		t.Fatalf("wrong suffix; want %q, got %q", want, got)
+	}
+}
+
+func TestChallenge13(t *testing.T) {
+	objWant := map[string]string{
+		"foo": "bar",
+		"baz": "qux",
+		"zap": "zazzle",
+	}
+	objGot := parseCookie("foo=bar&baz=qux&zap=zazzle")
+	if !cmp.Equal(objGot, objWant) {
+		t.Fatalf("wrong cookie parsing; want %#v, got %#v", objWant, objGot)
+	}
+
+	strWant := "email=foo@bar.com&uid=10&role=user"
+	if got := profileFor("foo@bar.com"); got != strWant {
+		t.Fatalf("wrong profile cookie encoding; want %q, got %q", strWant, got)
+	}
+
+	generateCookie, isAdmin := newECBCutAndPasteOracles()
+
+	if isAdmin(generateCookie("foo@bar.com")) {
+		t.Fatalf("generated cookie cannot be for role admin")
+	}
+
+	if !isAdmin(makeAdminECBCookie(generateCookie)) {
+		t.Fatalf("made up cookie is not for role admin")
+	}
+}
+
+func TestChallenge14(t *testing.T) {
+	want := base64ToByteSlice(t, `Um9sbGluJyBpbiBteSA1LjAKV2l0aCBteSByYWctdG9wIGRvd24gc28gbXkg
+aGFpciBjYW4gYmxvdwpUaGUgZ2lybGllcyBvbiBzdGFuZGJ5IHdhdmluZyBq
+dXN0IHRvIHNheSBoaQpEaWQgeW91IHN0b3A/IE5vLCBJIGp1c3QgZHJvdmUg
+YnkK`)
+	oracle := newECBSuffixOracleWithPrefix(want)
+	got := recoverECBSuffixWithPrefix(oracle)
 	t.Logf("secret suffix recovered =\n%s", got)
 	if !bytes.Equal(got, want) {
 		t.Fatalf("wrong suffix; want %q, got %q", want, got)

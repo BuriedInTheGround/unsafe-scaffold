@@ -5,7 +5,9 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
+	"encoding/hex"
 	"math/big"
+	"strings"
 )
 
 func padPKCS7(in []byte, blockSize int) []byte {
@@ -174,6 +176,167 @@ func recoverECBSuffix(oracle func([]byte) []byte) []byte {
 			// suffix. If the matching byte has value less than blockSize (and
 			// different from newline) terminate, as that is padding whp.
 			suffixByte := dict[string(target[(j-1)*blockSize:j*blockSize])]
+			if suffixByte != byte('\n') && suffixByte < byte(blockSize) {
+				break
+			}
+			suffix = append(suffix, suffixByte)
+		}
+	}
+
+	return suffix
+}
+
+func parseCookie(cookie string) map[string]string {
+	res := make(map[string]string)
+	for _, elem := range strings.Split(cookie, "&") {
+		keyvalue := strings.Split(elem, "=")
+		res[keyvalue[0]] = keyvalue[1]
+	}
+	return res
+}
+
+func profileFor(email string) string {
+	if strings.ContainsAny(email, "&=") {
+		panic("profileFor: & and = characters not allowed")
+	}
+	cookie := "email="
+	cookie += email
+	cookie += "&"
+	cookie += "uid=10&"
+	cookie += "role=user"
+	return cookie
+}
+
+func newECBCutAndPasteOracles() (
+	generateCookie func(email string) string,
+	isAdmin func(cookie string) bool,
+) {
+	key := randomBytes(aes.BlockSize)
+	b, err := aes.NewCipher(key)
+	if err != nil {
+		panic("newECBSuffixOracle: cannot initialize cipher")
+	}
+	generateCookie = func(email string) string {
+		in := []byte(profileFor(email))
+		return string(encryptECB(padPKCS7(in, b.BlockSize()), b))
+	}
+	isAdmin = func(cookie string) bool {
+		plain := decryptECB([]byte(cookie), b)
+		padLen := int(plain[len(plain)-1])
+		if padLen == 0 {
+			cookie = string(plain[:len(plain)-b.BlockSize()])
+		} else {
+			cookie = string(plain[:len(plain)-padLen])
+		}
+		obj := parseCookie(cookie)
+		if role, ok := obj["role"]; ok {
+			return role == "admin"
+		}
+		return false
+	}
+	return
+}
+
+func makeAdminECBCookie(generateCookie func(email string) string) string {
+	// Cookie content:
+	//     BLOCK 0          BLOCK 1          BLOCK 2          BLOCK 3
+	// email=foo+x@bar. adminPPPPPPPPPPP com&uid=10&role= userQQQQQQQQQQQQ (Q=12)
+	// 1234567890123456 1234567890123456 1234567890123456 1234567890123456
+
+	padding := string(bytes.Repeat([]byte{11}, 11))
+	cookie := generateCookie("foo+x@bar.admin" + padding + "com")
+
+	getCookieBlock := func(n int) string {
+		return cookie[16*n : 16*(n+1)]
+	}
+
+	// Admin cookie content:
+	// email=foo+x@bar. com&uid=10&role= adminPPPPPPPPPPP (P=11)
+	// 1234567890123456 1234567890123456 1234567890123456
+
+	adminCookie := getCookieBlock(0)
+	adminCookie += getCookieBlock(2)
+	adminCookie += getCookieBlock(1)
+
+	// Forged cookie:
+	// email=foo+x@bar.com&uid=10&role=admin
+	// {
+	//   email: 'foo+x@bar.com',
+	//   uid: 10,
+	//   role: 'admin'
+	// }
+
+	return adminCookie
+}
+
+func newECBSuffixOracleWithPrefix(secretSuffix []byte) func([]byte) []byte {
+	key := randomBytes(aes.BlockSize)
+	b, err := aes.NewCipher(key)
+	if err != nil {
+		panic("newECBSuffixOracle: cannot initialize cipher")
+	}
+	rndCount, _ := rand.Int(rand.Reader, big.NewInt(100))
+	prefixLen := int(rndCount.Int64())
+	return func(in []byte) []byte {
+		in = append(randomBytes(prefixLen), in...)
+		in = append(in, secretSuffix...)
+		return encryptECB(padPKCS7(in, b.BlockSize()), b)
+	}
+}
+
+func recoverECBSuffixWithPrefix(oracle func([]byte) []byte) []byte {
+	blockSize := 16
+
+	repeatingBlocks := func(in []byte) (count int, lastRepBlock int) {
+		count = 0
+		foundBlocks := make(map[string]struct{})
+		for i := 0; i < len(in); i += blockSize {
+			hs := hex.EncodeToString(in[i : i+blockSize])
+			if _, ok := foundBlocks[hs]; ok {
+				count++
+				lastRepBlock = i/blockSize + 1
+			}
+			foundBlocks[hs] = struct{}{}
+		}
+		return
+	}
+
+	var attackBytes int
+	var bytesUntilSuffix int
+	initRepBlocks, _ := repeatingBlocks(oracle(bytes.Repeat([]byte{0}, 48)))
+	for b := 49; b < 128; b++ {
+		blocks, num := repeatingBlocks(oracle(bytes.Repeat([]byte{0}, b)))
+		if blocks > initRepBlocks {
+			attackBytes = b
+			bytesUntilSuffix = num * blockSize
+			break
+		}
+	}
+
+	var suffix []byte
+
+	// Iterate j times, up to a maximum of 100 blocks.
+	for j := 1; j < 100; j++ {
+		for b := 1; b < blockSize; b++ {
+			// Evaluate the target, which actually is the last byte of the
+			// output of `oracle(random-prefix || known-string || unknown-1-byte)`.
+			target := oracle(bytes.Repeat([]byte("A"), attackBytes+j*blockSize-len(suffix)-1))
+			target = append(target, suffix...)
+
+			// Store every possible last byte oracle output.
+			dict := make(map[string]byte)
+			for i := 0; i < 256; i++ {
+				payload := bytes.Repeat([]byte("A"), attackBytes+j*blockSize-len(suffix)-1)
+				payload = append(payload, suffix...)
+				payload = append(payload, byte(i))
+				out := oracle(payload)
+				dict[string(out[bytesUntilSuffix+(j-1)*blockSize:bytesUntilSuffix+j*blockSize])] = byte(i)
+			}
+
+			// Find the one byte that match and append it to the recovered
+			// suffix. If the matching byte has value less than blockSize (and
+			// different from newline) terminate, as that is padding whp.
+			suffixByte := dict[string(target[bytesUntilSuffix+(j-1)*blockSize:bytesUntilSuffix+j*blockSize])]
 			if suffixByte != byte('\n') && suffixByte < byte(blockSize) {
 				break
 			}
