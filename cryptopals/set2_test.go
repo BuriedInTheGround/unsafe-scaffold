@@ -116,3 +116,40 @@ YnkK`)
 		t.Fatalf("wrong suffix; want %q, got %q", want, got)
 	}
 }
+
+func TestChallenge15(t *testing.T) {
+	input := []byte("ICE ICE BABY\x04\x04\x04\x04")
+	want := []byte("ICE ICE BABY")
+	got, err := validateAndStripPKCS7(input)
+	if err != nil {
+		t.Fatalf("expected no error; got %v", err)
+	}
+	if !bytes.Equal(got, want) {
+		t.Fatalf("wrong padding strip; want %q, got %q", want, got)
+	}
+
+	input = []byte("ICE ICE BABY\x05\x05\x05\x05")
+	_, err = validateAndStripPKCS7(input)
+	if err == nil {
+		t.Fatalf("expected error")
+	}
+
+	input = []byte("ICE ICE BABY\x01\x02\x03\x04")
+	_, err = validateAndStripPKCS7(input)
+	if err == nil {
+		t.Fatalf("expected error")
+	}
+}
+
+func TestChallenge16(t *testing.T) {
+	generateCookie, isAdmin := newCBCBitflipOracles()
+
+	input := "iceicebaby;admin=true;"
+	if isAdmin(generateCookie(input)) {
+		t.Fatalf("this would be too easy! try again")
+	}
+
+	if !isAdmin(makeAdminCBCCookie(generateCookie)) {
+		t.Fatalf("generated cookie is not for admin")
+	}
+}

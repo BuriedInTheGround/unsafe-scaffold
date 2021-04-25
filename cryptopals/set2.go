@@ -6,6 +6,7 @@ import (
 	"crypto/cipher"
 	"crypto/rand"
 	"encoding/hex"
+	"fmt"
 	"math/big"
 	"strings"
 )
@@ -214,7 +215,7 @@ func newECBCutAndPasteOracles() (
 	key := randomBytes(aes.BlockSize)
 	b, err := aes.NewCipher(key)
 	if err != nil {
-		panic("newECBSuffixOracle: cannot initialize cipher")
+		panic("newECBCutAndPasteOracles: cannot initialize cipher")
 	}
 	generateCookie = func(email string) string {
 		in := []byte(profileFor(email))
@@ -273,7 +274,7 @@ func newECBSuffixOracleWithPrefix(secretSuffix []byte) func([]byte) []byte {
 	key := randomBytes(aes.BlockSize)
 	b, err := aes.NewCipher(key)
 	if err != nil {
-		panic("newECBSuffixOracle: cannot initialize cipher")
+		panic("newECBSuffixOracleWithPrefix: cannot initialize cipher")
 	}
 	rndCount, _ := rand.Int(rand.Reader, big.NewInt(100))
 	prefixLen := int(rndCount.Int64())
@@ -345,4 +346,96 @@ func recoverECBSuffixWithPrefix(oracle func([]byte) []byte) []byte {
 	}
 
 	return suffix
+}
+
+func validateAndStripPKCS7(in []byte) ([]byte, error) {
+	// We specify a block size to be able to handle the \x00 pad.
+	blockSize := 16
+
+	// Treat the last padding byte as the validating one, so use it to get the
+	// paddding length. If the pad is \x00 set the padding length to be the
+	// same as the block size.
+	pad := in[len(in)-1]
+	padLength := int(pad)
+	if pad == 0 {
+		padLength = blockSize
+	}
+
+	// Check that the input is long enough to fit the padding.
+	if len(in) < padLength {
+		return []byte{}, fmt.Errorf("invalid PKCS#7 padding")
+	}
+
+	// Check that the padding content is entirely the same as the last byte.
+	for i := 2; i <= padLength; i++ {
+		if in[len(in)-i] != pad {
+			return []byte{}, fmt.Errorf("invalid PKCS#7 padding")
+		}
+	}
+
+	// Strip the padding and return with no error.
+	return in[:len(in)-padLength], nil
+}
+
+func newCBCBitflipOracles() (
+	generateCookie func(userdata string) string,
+	isAdmin func(cookie string) bool,
+) {
+	key := randomBytes(aes.BlockSize)
+	iv := randomBytes(aes.BlockSize)
+	b, err := aes.NewCipher(key)
+	if err != nil {
+		panic("newCBCBitflipOracles: cannot initialize cipher")
+	}
+	generateCookie = func(userdata string) string {
+		prefix := []byte("comment1=cooking%20MCs;userdata=")
+		suffix := []byte(";comment2=%20like%20a%20pound%20of%20bacon")
+		quotedIn := bytes.ReplaceAll([]byte(userdata), []byte(";"), []byte("%3B"))
+		quotedIn = bytes.ReplaceAll(quotedIn, []byte("="), []byte("%3D"))
+		in := append(prefix, quotedIn...)
+		in = append(in, suffix...)
+		return string(encryptCBC(iv, padPKCS7(in, b.BlockSize()), b))
+	}
+	isAdmin = func(in string) bool {
+		plaintext := decryptCBC(iv, []byte(in), b)
+		plainCookie, err := validateAndStripPKCS7(plaintext)
+		if err != nil {
+			return false
+		}
+		return strings.Contains(string(plainCookie), ";admin=true;")
+	}
+	return
+}
+
+func makeAdminCBCCookie(generateCookie func(userdata string) string) string {
+	// Prefix:
+	// comment1=cooking %20MCs;userdata=
+	// 1234567890123456 1234567890123456
+
+	// Suffix:
+	// ;comment2=%20lik e%20a%20pound%20 of%20baconPPPPPP  (P = 6)
+	// 1234567890123456 1234567890123456 1234567890123456
+
+	// Injected userdata:
+	// XXXXXXXXXXXXXXXX XXXXXXadminXtrue
+	// 1234567890123456 1234567890123456
+
+	cookie := generateCookie("XXXXXXXXXXXXXXXXXXXXXXadminXtrue")
+
+	// ord('X') ^ ord(';') = 88 ^ 59 = 99 = ord('c')
+	// ord('X') ^ ord('=') = 88 ^ 61 = 101 = ord('e')
+
+	adminCookie := []byte(cookie)
+
+	// Alteration ciphertext of injected userdata:
+	//      ???????????????? ????????????????
+	//  xor 00000c00000e0000 0000000000000000
+	//               ... decrypt ...
+	//    = ???????????????? ?????;admin=true
+	//      1234567890123456 1234567890123456
+
+	adminCookie[2*aes.BlockSize+5] ^= byte('c')
+	adminCookie[2*aes.BlockSize+11] ^= byte('e')
+
+	return string(adminCookie)
 }
