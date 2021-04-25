@@ -30,9 +30,9 @@ func newCBCPaddingOracles(target []byte) (
 }
 
 func attackCBCPaddingOracle(ciphertext []byte, isPaddingValid func([]byte) bool) []byte {
-	guessNextByte := func(knownBytes, previousBlock, targetBlock []byte) ([]byte, bool) {
+	guessOneMoreByte := func(knownBytes, previousBlock, targetBlock []byte) []byte {
 		if len(knownBytes) >= aes.BlockSize {
-			panic("attackCBCPaddingOracle: wrong input length for guessNextByte")
+			panic("attackCBCPaddingOracle: wrong input length for guessOneMoreByte")
 		}
 
 		// Initialize a payload block that will be modified and used as IV for
@@ -73,7 +73,7 @@ func attackCBCPaddingOracle(ciphertext []byte, isPaddingValid func([]byte) bool)
 			// If the guess evaluates to one with a valid padding, the guess is
 			// correct and we return.
 			if isPaddingValid(append(payload, targetBlock...)) {
-				return guessedPlaintext, false
+				return guessedPlaintext
 			}
 		}
 
@@ -82,31 +82,24 @@ func attackCBCPaddingOracle(ciphertext []byte, isPaddingValid func([]byte) bool)
 		// set the byte to be guessed to this padding value.
 		guessedPlaintext[0] = byte(len(guessedPlaintext))
 
-		// If the length of the guessed plaintext is equals to the block size,
-		// than the entire block contains only padding. Return by signaling
-		// this info.
-		return guessedPlaintext, len(guessedPlaintext) == aes.BlockSize
+		return guessedPlaintext
 	}
 
 	var plaintext []byte
-	var isEmptyBlock bool
 	for i := 0; i < len(ciphertext)/aes.BlockSize-1; i++ {
 		var knownBytes []byte
 		for j := 0; j < aes.BlockSize; j++ {
 			previousBlock := ciphertext[i*aes.BlockSize : (i+1)*aes.BlockSize]
 			targetBlock := ciphertext[(i+1)*aes.BlockSize : (i+2)*aes.BlockSize]
-			knownBytes, isEmptyBlock = guessNextByte(knownBytes, previousBlock, targetBlock)
-		}
-		if isEmptyBlock {
-			break
+			knownBytes = guessOneMoreByte(knownBytes, previousBlock, targetBlock)
 		}
 		plaintext = append(plaintext, knownBytes...)
 	}
 
 	stripped, err := validateAndStripPKCS7(plaintext)
-	if err == nil {
-		return stripped
+	for err == nil {
+		plaintext = stripped
+		stripped, err = validateAndStripPKCS7(plaintext)
 	}
-
 	return plaintext
 }
