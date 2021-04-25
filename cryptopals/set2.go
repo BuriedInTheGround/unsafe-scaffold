@@ -72,11 +72,7 @@ func decryptCBC(iv, in []byte, b cipher.Block) []byte {
 			copy(res[i:i+b.BlockSize()], xor(in[i-b.BlockSize():i], t))
 		}
 	}
-	padLen := int(res[len(res)-1])
-	if padLen == 0 {
-		return res[:len(res)-b.BlockSize()]
-	}
-	return res[:len(res)-padLen]
+	return res
 }
 
 func randomBytes(n int) []byte {
