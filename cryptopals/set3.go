@@ -3,6 +3,9 @@ package cryptopals
 import (
 	"bytes"
 	"crypto/aes"
+	"crypto/cipher"
+	"encoding/binary"
+	"unicode"
 )
 
 func newCBCPaddingOracles(target []byte) (
@@ -102,4 +105,103 @@ func attackCBCPaddingOracle(ciphertext []byte, isPaddingValid func([]byte) bool)
 		stripped, err = validateAndStripPKCS7(plaintext)
 	}
 	return plaintext
+}
+
+func encryptCTR(nonce, in []byte, b cipher.Block) []byte {
+	if len(nonce) != b.BlockSize()/2 {
+		panic("encryptCTR: wrong nonce length")
+	}
+	keystream := make([]byte, b.BlockSize())
+
+	counter := uint64(0)
+	counterBytes := make([]byte, b.BlockSize()/2)
+	binary.LittleEndian.PutUint64(counterBytes, counter)
+	b.Encrypt(keystream, append(nonce, counterBytes...))
+
+	res := make([]byte, len(in))
+	for i := range in {
+		res[i] = in[i] ^ keystream[i%b.BlockSize()]
+		if (i+1)%b.BlockSize() == 0 {
+			counter++
+			counterBytes := make([]byte, b.BlockSize()/2)
+			binary.LittleEndian.PutUint64(counterBytes, counter)
+			b.Encrypt(keystream, append(nonce, counterBytes...))
+		}
+	}
+
+	return res
+}
+
+func newCTRFixedNonce() (
+	encrypt func(in []byte) []byte,
+) {
+	key := randomBytes(aes.BlockSize)
+	b, err := aes.NewCipher(key)
+	if err != nil {
+		panic("newCTRFixedNonce: cannot initialize cipher")
+	}
+	nonce := bytes.Repeat([]byte{0}, b.BlockSize()/2)
+	encrypt = func(in []byte) []byte {
+		return encryptCTR(nonce, in, b)
+	}
+	return
+}
+
+func findCTRFixedNonceKeystreamWithSubstitution(ciphertexts [][]byte, scoring map[rune]float64) []byte {
+	// Generate a subset of scoring containing only uppercase characters. This
+	// will be used to guess the first byte of the keystream.
+	upperScoring := make(map[rune]float64)
+	for r, s := range scoring {
+		if !unicode.IsUpper(r) {
+			continue
+		}
+		upperScoring[r] = s
+	}
+
+	// Find the longest ciphertext.
+	var longest []byte
+	maxLength := 0
+	for _, c := range ciphertexts {
+		if len(c) > maxLength {
+			longest = c
+			maxLength = len(c)
+		}
+	}
+
+	// Initialize the keystream with the same length as the longest ciphertext.
+	keystream := make([]byte, maxLength)
+
+	for i := 0; i < maxLength; i++ {
+		// column contains all bytes XORed with the same keystream byte.
+		var column []byte
+		for _, c := range ciphertexts {
+			if len(c) <= i {
+				continue
+			}
+			column = append(column, c[i])
+		}
+
+		// Find the most probable value for the i-th keystream byte.
+		var bestByteGuess byte
+		maxScore := float64(0)
+		for b := 0; b < 256; b++ {
+			byteGuess := longest[i] ^ byte(b)
+			t := xor(column, bytes.Repeat([]byte{byteGuess}, len(column)))
+			var score float64
+			if i == 0 {
+				score = scoreByteSlice(t, upperScoring)
+			} else {
+				score = scoreByteSlice(t, scoring)
+			}
+			if score > maxScore {
+				bestByteGuess = byte(b)
+				maxScore = score
+			}
+		}
+
+		// Set the i-byte keystream byte using the best scoring byte guess.
+		keystream[i] = longest[i] ^ bestByteGuess
+	}
+
+	return keystream
 }

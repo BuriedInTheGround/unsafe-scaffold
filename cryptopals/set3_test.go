@@ -2,8 +2,10 @@ package cryptopals
 
 import (
 	"bytes"
+	"crypto/aes"
 	"crypto/rand"
 	"math/big"
+	"strings"
 	"testing"
 )
 
@@ -34,5 +36,48 @@ func TestChallenge17(t *testing.T) {
 
 	if !bytes.Equal(recoveredPlaintext, target) {
 		t.Fatalf("wrong plaintext recovered; want %q, got %q", target, recoveredPlaintext)
+	}
+}
+
+func TestChallenge18(t *testing.T) {
+	b, err := aes.NewCipher([]byte("YELLOW SUBMARINE"))
+	if err != nil {
+		t.Fatalf("cannot initialize cipher; err = %v", err)
+	}
+
+	// Test consistency equation `D(key, nonce, E(key, nonce, msg)) = msg`.
+	want := []byte("sollicitudin aliquam ultrices sagittis orci a scelerisque purus semper eget duis at tellus at urna")
+	intermediate := encryptCTR(bytes.Repeat([]byte{42}, aes.BlockSize/2), want, b)
+	got := encryptCTR(bytes.Repeat([]byte{42}, aes.BlockSize/2), intermediate, b)
+	if !bytes.Equal(got, want) {
+		t.Fatalf("wrong D(k, n, E(k, n, m)) result; want %q, got %q", want, got)
+	}
+
+	// Decrypt the message.
+	input := base64ToByteSlice(t, "L77na/nrFsKvynd6HzOoG7GHTLXsTVu9qvY/2syLXzhPweyyMTJULu/6/kXX0KSvoOLSFQ==")
+	decryptedMessage := encryptCTR(bytes.Repeat([]byte{0}, aes.BlockSize/2), input, b)
+	t.Logf("%q", decryptedMessage)
+}
+
+func TestChallenge19(t *testing.T) {
+	data := readFromFile("testdata/19.txt")
+	inputs := strings.Split(data, "\n")
+
+	encrypt := newCTRFixedNonce()
+	var ciphertexts [][]byte
+	for _, in := range inputs {
+		ciphertexts = append(ciphertexts, encrypt(base64ToByteSlice(t, in)))
+	}
+
+	scoring := generateScoringFromCorpus(corpus)
+
+	// This keystream (and the subsequent plaintexts) aren't perfect, in
+	// particular for the last few bytes. This is because the guess-and-score
+	// tecnique is applied only to single letters and isn't to i-grams.
+	keystream := findCTRFixedNonceKeystreamWithSubstitution(ciphertexts, scoring)
+
+	for i, c := range ciphertexts {
+		plaintext := xor(c, keystream[:len(c)])
+		t.Logf("plaintext #%d ~= %q", i+1, plaintext)
 	}
 }
