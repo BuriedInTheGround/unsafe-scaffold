@@ -205,3 +205,93 @@ func findCTRFixedNonceKeystreamWithSubstitution(ciphertexts [][]byte, scoring ma
 
 	return keystream
 }
+
+func findCTRFixedNonceKeystreamStatistically(ciphertexts [][]byte, scoring map[rune]float64) []byte {
+	upperScoring := make(map[rune]float64)
+	for r, s := range scoring {
+		if !unicode.IsUpper(r) {
+			continue
+		}
+		upperScoring[r] = s
+	}
+
+	minLen := 1 << 31
+	for _, c := range ciphertexts {
+		if len(c) < minLen {
+			minLen = len(c)
+		}
+	}
+
+	columns := make([][]byte, minLen)
+
+	for i := 0; i < minLen; i++ {
+		columns[i] = make([]byte, len(ciphertexts))
+		for j, c := range ciphertexts {
+			columns[i][j] = c[i]
+		}
+	}
+
+	keystream := make([]byte, minLen)
+	for i, b := range columns {
+		if i == 0 {
+			keystream[i] = findSingleXORKey(b, upperScoring)
+		} else {
+			keystream[i] = findSingleXORKey(b, scoring)
+		}
+	}
+
+	return keystream
+}
+
+type MT19937 struct {
+	state [624]uint32
+	index int
+}
+
+func (mt *MT19937) seed(s uint32) {
+	mt.index = 624
+	mt.state[0] = s
+
+	f := uint32(1812433253)
+
+	for i := 1; i < 624; i++ {
+		mt.state[i] = f*((mt.state[i-1])^(mt.state[i-1]>>30)) + uint32(i)
+	}
+}
+
+func (mt *MT19937) rand() uint32 {
+	if mt.index >= 624 {
+		if mt.index > 624 {
+			panic("MT19937: generator never seeded")
+		}
+		mt.twist()
+	}
+
+	y := mt.state[mt.index]
+	y ^= y >> 11
+	y ^= (y << 7) & uint32(0x9d2c5680)
+	y ^= (y << 15) & uint32(0xefc60000)
+	y ^= y >> 18
+
+	mt.index++
+
+	return y
+}
+
+func (mt *MT19937) twist() {
+	lowerMask := uint32((1 << 31) - 1)
+	upperMask := uint32(^lowerMask)
+
+	for i := range mt.state {
+		x := (mt.state[i] & upperMask) + (mt.state[(i+1)%624] & lowerMask)
+		xA := x >> 1
+
+		if x%2 != 0 {
+			xA ^= uint32(0x9908b0df)
+		}
+
+		mt.state[i] = mt.state[(i+397)%624] ^ xA
+	}
+
+	mt.index = 0
+}

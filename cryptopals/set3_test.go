@@ -81,3 +81,39 @@ func TestChallenge19(t *testing.T) {
 		t.Logf("plaintext #%d ~= %q", i+1, plaintext)
 	}
 }
+
+func TestChallenge20(t *testing.T) {
+	data := readFromFile("testdata/20.txt")
+	inputs := strings.Split(data, "\n")
+
+	encrypt := newCTRFixedNonce()
+	var ciphertexts [][]byte
+	for _, in := range inputs {
+		plain := base64ToByteSlice(t, in)
+		if len(plain) == 0 {
+			continue
+		}
+		ciphertexts = append(ciphertexts, encrypt(plain))
+	}
+
+	scoring := generateScoringFromCorpus(corpus)
+
+	// The length of this keystream is the same as the shortest of the
+	// ciphertexts. This follows from the suggestion given from the challenge.
+	// The full keystream may be recovered entirely with more work.
+	keystream := findCTRFixedNonceKeystreamStatistically(ciphertexts, scoring)
+
+	for _, c := range ciphertexts {
+		plaintext := xor(c[:len(keystream)], keystream)
+		t.Logf("%q", plaintext)
+	}
+}
+
+func TestChallenge21(t *testing.T) {
+	mt := MT19937{}
+	mt.seed(42)
+	rnd := mt.rand()
+	if rnd != 1608637542 {
+		t.Errorf("wrong result; want %d, got %d", 1608637542, rnd)
+	}
+}
