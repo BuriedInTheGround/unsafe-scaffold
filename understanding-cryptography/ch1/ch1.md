@@ -1,7 +1,3 @@
-<style type="text/css">
-    ol ol { list-style-type: lower-alpha; }
-</style>
-
 # Chapter 1
 
 ## Exercise 1.1
