@@ -8,7 +8,7 @@ Let *xi*, *yi*, *si* be **in {0, 1, ..., 25}**.
 
 The key stream bits *si* are random integers in Z26.
 
-*Encryption:* **yi = E(xi) = xi + si mod 26**
+*Encryption:* **yi = E(xi) = xi + si mod 26**\
 *Decryption:* **xi = D(yi) = yi - si mod 26**
 
 ### 2.
