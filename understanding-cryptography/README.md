@@ -10,3 +10,4 @@ Christof Paar and Jan Pelzl.
 
 - [Chapter 1](./ch1/ch1.md)
 - [Chapter 2](./ch2/ch2.md)
+- [Chapter 3](./ch3/ch3.md)
