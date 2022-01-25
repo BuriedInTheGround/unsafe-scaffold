@@ -119,7 +119,7 @@ func main() {
 
 	fmt.Printf("Plaintext: ")
 	for _, s := range binStrings {
-		value, _ := strconv.ParseInt(s, 2, 6)
+		value, _ := strconv.ParseUint(s, 2, 5)
 		fmt.Printf("%c", mapping[int(value)])
 	}
 	fmt.Printf("\n")

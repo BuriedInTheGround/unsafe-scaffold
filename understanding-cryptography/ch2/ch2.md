@@ -8,16 +8,16 @@ Let *xi*, *yi*, *si* be **in {0, 1, ..., 25}**.
 
 The key stream bits *si* are random integers in Z26.
 
-*Encryption:* **yi = E(xi) = xi + si mod 26**\
-*Decryption:* **xi = D(yi) = yi - si mod 26**
+*Encryption:* **yi = e_si(xi) = xi + si mod 26**\
+*Decryption:* **xi = d_si(yi) = yi - si mod 26**
 
 ### 2.
 
-*Ciphertext:* `bsaspp kkuosp`\
-*Key stream:* `rsidpy dkawoy` (the book has a mistake, the last key letter is indeed `y`, not `a`)
+*Ciphertext:* `bsaspp kkuosr` (the book has a mistake, the last character is indeed `r`, not `p`)\
+*Key stream:* `rsidpy dkawoa`
 
-- Ciphertext to integers: ` 1 18  0 18 15 15   10 10 20 14 18 15`
-- Key stream to integers: `17 18  8  3 15 24    3 10  0 22 14 24`
+- Ciphertext to integers: ` 1 18  0 18 15 15   10 10 20 14 18 17`
+- Key stream to integers: `17 18  8  3 15 24    3 10  0 22 14  0`
 - Plaintext integers:     `10  0 18 15  0 17    7  0 20 18  4 17`
 
 *Plaintext:* `kaspar hauser`
@@ -30,7 +30,7 @@ The key stream bits *si* are random integers in Z26.
 
 Using the OTP, with the said CD-ROM with capacity of 1Gbyte to store the key,
 has the following implications:
-- once the every bit of the key stream contained into the CD is used for
+- once every bit of the key stream contained into the CD is used for
   encryption, a completely new key must be generated;
 - the CD containing the key must be kept in a safe place, even after its use
   for encrypting;
@@ -100,9 +100,9 @@ sequence is the left rotated version by 3 positions of the first one.
 
 ## Exercise 2.6
 
-Let's call *m* the period length in bits. To attack the described cipher, it is
-necessary to know *m* bits of plaintext and the corresponding ciphertext (in
-this case, between 18.75 bytes and 25 bytes). Once the attacker knows the *m*
+Let's call *t* the period length in bits. To attack the described cipher, it is
+necessary to know *t* bits of plaintext and the corresponding ciphertext (in
+this case, between 18.75 bytes and 25 bytes). Once the attacker knows the *t*
 bits of plaintext and ciphertext, he can XOR the two to retrieve the key
 stream. It is important to check whether the correct number of bits was being
 used, by looking for a repetition in the bits of the key stream. If everything
@@ -278,7 +278,7 @@ Let `m = 256`.
 Attack steps:
 1. Get the said 512 plaintext/ciphertext bit pairs.
 2. Calculate the values of `si = xi + yi mod 2` for `i = 0, 1, ..., 2m-1`; that
-   is reconstruct the from 512 bits of key stream.
+   is, reconstruct the key stream from the 512 bit pairs.
 3. Mount a system of linear equations to find the values `pi` of the feedback
    coefficients, described as following.
 
@@ -291,8 +291,8 @@ Attack steps:
 
 4. Solve the system of linear equations for the unknowns, which are indeed the
    256 feedback coefficients.
-5. Using the values found, build the LFSR with which decrypt the entire
-   ciphertext.
+5. Using the values found, build the LFSR. It is now possible to decrypt the
+   entire ciphertext.
 
 ### 3.
 
@@ -427,10 +427,14 @@ s10 = p0*s4 + p1*s5 + p2*s6 + p3*s7 + p4*s8 + p5*s9  mod 2
 s11 = p0*s5 + p1*s6 + p2*s7 + p3*s8 + p4*s9 + p5*s10  mod 2
 ```
 
-substituting the known values we have
+substituting the known values
 
+```
 s0  s1  s2  s3  s4  s5  s6  s7  s8  s9  s10 s11
 1   1   1   1   1   1   0   0   0   0   0   1
+```
+
+we have
 
 ```
 0 = p0 + p1 + p2 + p3 + p4 + p5  mod 2
