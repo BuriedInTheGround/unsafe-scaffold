@@ -498,3 +498,92 @@ The dimensional analysis follows.
 For a data rate of 1 Gbit/s a clock frequency of 250 MHz is required.
 
 For a data rate of 8 Gbit/s a clock frequency of 2 GHz is required.
+
+## Exercise 3.11
+
+### 1.
+
+The total number of DES engines is
+```
+e = 20 × 6 × 4 = 480
+```
+
+The number of clock cycles, and hence the number of encryptions, that a single
+DES engine performs per second is
+```
+c = (100 MHz) × (1 enc/cycle)
+  = 100 × 10⁶ enc/s
+```
+
+Therefore, since the average number of encryptions needed for a successful
+exhaustive key search attack is `s = 2⁵⁵`, the average runtime of this
+COPACOBANA platform is
+```
+t = s / (e × c)
+  = 2⁵⁵ / (480 × 100 × 10⁶)
+  ≈ 750600 s
+  = 8 days, 16 hours, 30 minutes
+```
+
+### 2.
+
+Let
+```
+t = 1 hour
+  = 3600 s
+```
+be the average search time that we want to achieve.
+
+Then, the number of COPACOBANA machines that we need is
+```
+m = s / (e × c × t)
+  = 2⁵⁵ / (480 × 100 × 10⁶ × 3600)
+  ≈ 209
+```
+
+### 3.
+
+Any design of a key search machine constitute only an upper security threshold
+because it applies a brute force attack which may not be the best possible one.
+For example, an analytical attack that exploit a cipher's design or
+implementation vulnerability could be more powerful.
+
+## Exercise 3.12
+
+### 1.
+
+If all 8 characters are randomly chosen 8-bit ASCII characters, the size of the
+key space is `2⁵⁶`, since the PC-1 permutation ignores the LSB.
+
+To a single PC that can test `10⁶` keys per second an average key search would
+take
+```
+t = 2⁵⁵ / 10⁶
+  ≈ 416999 days, 23 hours, 10 minutes, 19 s
+  ≈ 1141 years, 8 months, 6 days, 5 hours
+```
+
+### 2.
+
+If the 8 characters are randomly chosen 7-bit ASCII with a leading zero, the
+size of the key space shrinks down to `2⁴⁸`.
+
+An average key search would then take
+```
+t = 2⁴⁷ / 10⁶
+  ≈ 1628 days, 21 hours, 44 minutes, 48 s
+  ≈ 4 years, 5 months, 15 days, 17 hours
+```
+
+### 3.
+
+When only letters are used, `26 + 26 = 52` possible characters are possible,
+and the size of the key space is `52 × 8 = 416` keys.
+
+Furthermore, when all characters are capital letters, only `26` characters are
+possible. The key space is reduced to `26 × 8 = 208` possible keys, and an
+average key search with a single PC takes
+```
+t = (208 / 2) / 10⁶
+  = 104 μs
+```
