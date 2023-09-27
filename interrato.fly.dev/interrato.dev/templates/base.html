@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=yes">
+        <link rel="stylesheet" href="/static/fonts.css">
+        <link rel="stylesheet" href="/static/build.css">
+        <meta name="description" content="{{ .Description }}">
+        <link rel="canonical" href="https://interrato.dev{{ .Path }}">
+        <title>Simone Ragusa - {{ .Title }}</title>
+    </head>
+    <body class="p-4 m-4 mx-auto max-w-3xl text-sm sm:text-base antialiased">
+        <header class="mb-20">
+            <nav class="pb-0.5 mb-3 border-b border-neutral-300">
+                <p class="font-serif text-lg sm:text-xl font-bold uppercase">Simone Ragusa</p>
+            </nav>
+            <nav class="flex-wrap flex">
+                <div class="px-1.5 mb-2 w-1/3 sm:w-1/5">
+                    <a class="btn w-full" href="/">
+                        {{ if eq .Path "/" }}<i class="nav-active-icon"></i>{{ end }}Home
+                    </a>
+                </div>
+                <div class="px-1.5 mb-2 w-1/3 sm:w-1/5">
+                    <a class="btn w-full" href="/cv/">
+                        {{ if eq .Path "/cv/" }}<i class="nav-active-icon"></i>{{ end }}CV
+                    </a>
+                </div>
+            </nav>
+        </header>
+        <main>
+            {{ template "content" . }}
+        </main>
+        <footer class="pt-1.5 mt-20 border-t border-neutral-300">
+            <small class="text-2xs sm:text-xs text-neutral-400">© Copyright 2023, Simone Ragusa.</small>
+        </footer>
+    </body>
+</html>

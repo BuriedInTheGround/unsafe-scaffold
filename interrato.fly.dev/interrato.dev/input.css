@@ -1,0 +1,84 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    hr {
+        @apply mt-3 mb-10;
+        @apply border-t-2 border-neutral-200 border-dashed;
+    }
+}
+
+@layer components {
+    .btn {
+        @apply inline-block;
+        @apply px-2;
+        @apply max-h-[1.625rem];
+        @apply text-center align-middle whitespace-nowrap;
+        @apply border border-black outline-none;
+        @apply shadow-[2px_2px] shadow-neutral-400;
+
+        @apply hover:text-white;
+        @apply hover:bg-black;
+
+        @apply focus:text-white;
+        @apply focus:bg-black;
+        @apply focus:shadow-none;
+    }
+
+    .suffix-r-arrow {
+        @apply after:content-['_→'];
+    }
+
+    .link {
+        @apply text-signal-blue-49;
+
+        @apply hover:text-signal-blue-59;
+        @apply hover:underline;
+
+        @apply focus-visible:outline-2;
+        @apply focus-visible:outline-neutral-400;
+        @apply focus-visible:outline-dashed;
+    }
+
+    .tbl-container {
+        @apply overflow-x-auto;
+    }
+
+    .tbl {
+        @apply w-full;
+        @apply border border-neutral-400;
+        @apply border-collapse;
+    }
+
+    .tbl-data {
+        @apply px-1.5;
+        @apply border border-neutral-400;
+    }
+
+    .tbl-header {
+        @apply px-1.5;
+        @apply text-left;
+        @apply bg-neutral-100;
+        @apply border border-black;
+    }
+
+    .data-bar {
+        @apply inline-block;
+        @apply bg-pastel-blue-13;
+    }
+
+    .nav-active-icon {
+        @apply inline-block;
+        @apply mr-1.5;
+        @apply w-2.5 h-2.5;
+        @apply bg-luminous-red;
+        @apply rounded-full border border-black;
+    }
+
+    .svg-icon {
+        @apply inline-block;
+        @apply w-4;
+        @apply align-middle;
+    }
+}
