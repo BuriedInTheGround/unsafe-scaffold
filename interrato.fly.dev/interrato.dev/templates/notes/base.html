@@ -1,0 +1,7 @@
+{{ define "main" }}
+<hgroup>
+    <small>{{ .Date }}</small>
+    <h1>{{ .Title }}</h1>
+</hgroup>
+{{ template "content" . }}
+{{ end }}

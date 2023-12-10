@@ -1,0 +1,24 @@
+{{ define "main" }}
+<h1>Notes</h1>
+
+{{ if not .Data }}
+<p>Nothing to see here…</p>
+{{ else }}
+<table>
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Title</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{ range .Data }}
+        <tr>
+            <td>{{ .Date }}</td>
+            <td><a href="/notes/{{ .Slug }}" rel="noreferrer">{{ .Title }}</a></td>
+        </tr>
+        {{ end }}
+    </tbody>
+</table>
+{{ end }}
+{{ end }}

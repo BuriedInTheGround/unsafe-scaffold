@@ -1,44 +1,44 @@
 @font-face {
-  font-family: "Work Sans";
-  /* font-style: normal; */
-  font-weight: 100 900;
-  font-display: swap;
-  src: url("fonts/WorkSans-VariableFont_wght.woff2") format("woff2"),
-       url("fonts/WorkSans-VariableFont_wght.ttf") format("truetype");
+    font-family: "Work Sans";
+    /* font-style: normal; */
+    font-weight: 100 900;
+    font-display: swap;
+    src: url("fonts/WorkSans-VariableFont_wght.woff2") format("woff2"),
+         url("fonts/WorkSans-VariableFont_wght.ttf") format("truetype");
 }
 
 @font-face {
-  font-family: "Work Sans";
-  font-style: italic;
-  font-weight: 100 900;
-  font-display: swap;
-  src: url("fonts/WorkSans-Italic-VariableFont_wght.woff2") format("woff2"),
-       url("fonts/WorkSans-Italic-VariableFont_wght.ttf") format("truetype");
+    font-family: "Work Sans";
+    font-style: italic;
+    font-weight: 100 900;
+    font-display: swap;
+    src: url("fonts/WorkSans-Italic-VariableFont_wght.woff2") format("woff2"),
+         url("fonts/WorkSans-Italic-VariableFont_wght.ttf") format("truetype");
 }
 
 @font-face {
-  font-family: "Red Rose";
-  /* font-style: normal; */
-  font-weight: 300 700;
-  font-display: swap;
-  src: url("fonts/RedRose-VariableFont_wght.woff2") format("woff2"),
-       url("fonts/RedRose-VariableFont_wght.ttf") format("truetype");
+    font-family: "Red Rose";
+    /* font-style: normal; */
+    font-weight: 300 700;
+    font-display: swap;
+    src: url("fonts/RedRose-VariableFont_wght.woff2") format("woff2"),
+         url("fonts/RedRose-VariableFont_wght.ttf") format("truetype");
 }
 
 @font-face {
-  font-family: "Fragment Mono";
-  /* font-style: normal; */
-  font-weight: 400;
-  font-display: swap;
-  src: url("fonts/FragmentMono-Regular.woff2") format("woff2"),
-       url("fonts/FragmentMono-Regular.ttf") format("truetype");
+    font-family: "Fragment Mono";
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url("fonts/FragmentMono-Regular.woff2") format("woff2"),
+         url("fonts/FragmentMono-Regular.ttf") format("truetype");
 }
 
 @font-face {
-  font-family: "Fragment Mono";
-  font-style: italic;
-  font-weight: 400;
-  font-display: swap;
-  src: url("fonts/FragmentMono-Italic.woff2") format("woff2"),
-       url("fonts/FragmentMono-Italic.ttf") format("truetype");
+    font-family: "Fragment Mono";
+    font-style: italic;
+    font-weight: 400;
+    font-display: swap;
+    src: url("fonts/FragmentMono-Italic.woff2") format("woff2"),
+         url("fonts/FragmentMono-Italic.ttf") format("truetype");
 }

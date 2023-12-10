@@ -3,82 +3,317 @@
 @tailwind utilities;
 
 @layer base {
+    /* Zeroth-level layout */
+    body {
+        @apply p-4 mx-auto;
+        @apply max-w-2xl lg:max-w-4xl;
+        @apply font-sans;
+        @apply text-base lg:text-lg;
+        @apply antialiased;
+    }
+
+    /* First-level layout */
+    header {
+        @apply mb-8;
+    }
+    /* main { } */
+    footer {
+        @apply flex flex-wrap;
+        @apply px-2 py-1 mt-8;
+        @apply bg-neutral-200;
+    }
+
+    /* Second-level layout */
+    nav {
+        @apply flex flex-wrap gap-2;
+        @apply px-4 py-2;
+        @apply bg-neutral-200;
+    }
+    hgroup {
+        @apply mb-4;
+    }
     hr {
-        @apply mt-3 mb-10;
+        @apply my-6;
         @apply border-t-2 border-neutral-200 border-dashed;
     }
-}
 
-@layer components {
-    .btn {
-        @apply inline-block;
-        @apply px-2;
-        @apply max-h-[1.625rem];
-        @apply text-center align-middle whitespace-nowrap;
-        @apply border border-black outline-none;
-        @apply shadow-[2px_2px] shadow-neutral-400;
+    /* Typography */
+    h1 {
+        @apply text-lg lg:text-xl;
+        @apply font-bold;
+    }
+    h2 {
+        @apply font-bold;
+    }
+    h3 {
+        @apply font-semibold;
+    }
+    p, h1, h2, h3, h4, h5, h6 {
+        @apply mb-4;
+    }
+    strong {
+        @apply font-semibold;
+    }
+    small {
+        @apply text-sm lg:text-base;
+        @apply text-neutral-800;
+        @apply leading-snug;
+    }
+
+    /* Lists */
+    ol {
+        @apply mb-4;
+        @apply list-inside list-decimal;
+    }
+    ul {
+        @apply mb-4;
+        @apply list-inside list-disc;
+    }
+
+    /* Generic figure */
+    figure {
+        @apply mb-4;
+    }
+
+    /* Quotations */
+    blockquote {
+        @apply pl-4;
+        @apply border-l-4 border-neutral-200;
+    }
+    blockquote > p {
+        @apply pt-px;
+
+        @apply before:content-[open-quote];
+        @apply after:content-[close-quote];
+    }
+    blockquote + figcaption {
+        @apply pt-2 pb-1 pl-4 -mt-4 mb-4;
+        @apply border-l-4 border-neutral-200;
+
+        @apply before:content-['―_'];
+    }
+
+    /* Links */
+    a {
+        @apply text-blue-900;
+        @apply underline;
 
         @apply hover:text-white;
-        @apply hover:bg-black;
+        @apply hover:bg-signal-blue;
 
-        @apply focus:text-white;
-        @apply focus:bg-black;
-        @apply focus:shadow-none;
-    }
-
-    .suffix-r-arrow {
-        @apply after:content-['_→'];
-    }
-
-    .link {
-        @apply text-signal-blue-49;
-
-        @apply hover:text-signal-blue-59;
-        @apply hover:underline;
+        @apply active:text-white;
+        @apply active:bg-signal-blue;
 
         @apply focus-visible:outline-2;
-        @apply focus-visible:outline-neutral-400;
-        @apply focus-visible:outline-dashed;
+        @apply focus-visible:outline-indigo-500;
+        @apply focus-visible:outline;
+        @apply focus-visible:outline-offset-2;
+    }
+    a[rel~="external"][target="_blank"] {
+        @apply whitespace-nowrap;
+        @apply after:content-['_↗'];
     }
 
-    .tbl-container {
+    /* Code */
+    pre {
         @apply overflow-x-auto;
+        @apply p-2 mb-4;
+        @apply text-sm lg:text-base;
+        @apply bg-neutral-200;
+        @apply border border-neutral-400;
+    }
+    code {
+        @apply px-1 py-0.5;
+        @apply text-sm lg:text-base;
+        @apply bg-neutral-200;
+        @apply border border-neutral-300;
+    }
+    pre > code {
+        @apply p-0;
+        @apply bg-transparent;
+        @apply border-0;
     }
 
-    .tbl {
+    /* Tables */
+    table {
+        @apply mb-4;
         @apply w-full;
         @apply border border-neutral-400;
         @apply border-collapse;
     }
-
-    .tbl-data {
+    caption {
+        @apply pt-1;
+        @apply text-left;
+        @apply caption-bottom;
+    }
+    thead {
+        @apply bg-neutral-200;
+    }
+    tfoot {
+        @apply bg-neutral-200;
+    }
+    th {
+        @apply px-1.5;
+        @apply text-left;
+        @apply border border-neutral-400;
+    }
+    td {
         @apply px-1.5;
         @apply border border-neutral-400;
     }
 
-    .tbl-header {
-        @apply px-1.5;
+    /* Images */
+    img {
+        @apply p-0.5 lg:mt-1.5;
+        @apply italic;
+        @apply border border-neutral-400;
+    }
+    img + figcaption {
+        @apply pt-1;
         @apply text-left;
-        @apply bg-neutral-100;
-        @apply border border-black;
     }
 
-    .data-bar {
-        @apply inline-block;
-        @apply bg-pastel-blue-13;
+    /* LaTeX */
+    mjx-container {
+        @apply overflow-x-auto;
+
+        @apply focus-visible:outline-2;
+        @apply focus-visible:outline-indigo-500;
+        @apply focus-visible:outline;
+        @apply focus-visible:outline-offset-2;
+    }
+}
+
+@layer components {
+    /* Two-column layout */
+    .columns {
+        @apply flex flex-wrap;
+    }
+    .column-right {
+        @apply lg:pl-2;
+        @apply w-full lg:w-1/2;
+    }
+    .column-left {
+        @apply lg:pr-2;
+        @apply w-full lg:w-1/2;
     }
 
-    .nav-active-icon {
-        @apply inline-block;
-        @apply mr-1.5;
-        @apply w-2.5 h-2.5;
-        @apply bg-luminous-red;
-        @apply rounded-full border border-black;
+    /* Typography for the website title */
+    .text-site-title {
+        @apply block;
+        @apply mb-2;
+        @apply font-serif;
+        @apply text-xl lg:text-2xl;
+        @apply font-bold uppercase;
     }
 
-    .svg-icon {
+    /* Link to the current page or to an ancestor of the current page */
+    .link-current {
+        @apply text-white;
+        @apply bg-signal-red;
+    }
+
+    /* Button-like links */
+    .link-btn {
         @apply inline-block;
-        @apply w-4;
-        @apply align-middle;
+        @apply px-2 py-0.5;
+        @apply border;
+
+        @apply hover:text-white;
+        @apply hover:bg-black;
+
+        @apply active:text-white;
+        @apply active:bg-black;
+    }
+
+    /* Safety statements */
+    .safety-statement {
+        @apply pl-4;
+        @apply border-l-4;
+
+        @apply before:px-2 before:py-0.5;
+        @apply before:font-semibold;
+    }
+    .safety-danger {
+        @apply safety-statement;
+
+        @apply border-signal-red;
+
+        @apply before:text-white;
+        @apply before:content-['Danger'];
+        @apply before:bg-signal-red;
+    }
+    .safety-warning {
+        @apply safety-statement;
+
+        @apply border-signal-orange;
+
+        @apply before:text-white;
+        @apply before:content-['Warning'];
+        @apply before:bg-signal-orange;
+    }
+    .safety-caution {
+        @apply safety-statement;
+
+        @apply border-signal-yellow;
+
+        @apply before:content-['Caution'];
+        @apply before:bg-signal-yellow;
+    }
+    .safety-notice {
+        @apply safety-statement;
+
+        @apply border-signal-blue;
+
+        @apply before:text-white;
+        @apply before:content-['Notice'];
+        @apply before:bg-signal-blue;
+    }
+    .safety-recommendation {
+        @apply safety-statement;
+
+        @apply border-signal-green;
+
+        @apply before:text-white;
+        @apply before:content-['Recommendation'];
+        @apply before:bg-signal-green;
+    }
+}
+
+@layer utilities {
+    .sp-yellow {
+        @apply text-black;
+        @apply bg-signal-yellow;
+        @apply border-black;
+    }
+    .sp-orange {
+        @apply text-white;
+        @apply bg-signal-orange;
+        @apply border-black;
+    }
+    .sp-red {
+        @apply text-white;
+        @apply bg-signal-red;
+        @apply border-black;
+    }
+    .sp-blue {
+        @apply text-white;
+        @apply bg-signal-blue;
+        @apply border-black;
+    }
+    .sp-green {
+        @apply text-white;
+        @apply bg-signal-green;
+        @apply border-black;
+    }
+    .sp-white {
+        @apply text-black;
+        @apply bg-signal-white;
+        @apply border-black;
+    }
+    .sp-black {
+        @apply text-white;
+        @apply bg-signal-black;
+        @apply border-black;
     }
 }

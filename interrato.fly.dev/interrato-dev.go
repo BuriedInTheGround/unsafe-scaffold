@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"strings"
 )
 
 //go:embed interrato.dev
@@ -37,6 +38,41 @@ func (h goGetHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	goGetTmpl.Execute(w, h)
 }
 
+var pages = []struct {
+	Title        string
+	Description  string
+	Path         string
+	TemplateName string
+	Data         any
+}{
+	{
+		Title:        "", // no title for the homepage
+		Description:  "Computer Engineer, Cybersecurity at the University of Padua.",
+		Path:         "/",
+		TemplateName: "home.html",
+	},
+	{
+		Title:        "Notes",
+		Description:  "Index of Simone's notes.",
+		Path:         "/notes/",
+		TemplateName: "notes.html", Data: notes,
+	},
+	{
+		Title:        "Resume",
+		Description:  "Simone's resume.",
+		Path:         "/resume/",
+		TemplateName: "resume.html",
+	},
+}
+
+var notes = []struct {
+	Title       string
+	Description string
+	Path        string // left empty, constructed later as /notes/{slug}/
+	Slug        string
+	Date        string
+}{}
+
 func interratoDev(mux *http.ServeMux) {
 	mux.HandleFunc("www.interrato.dev/", func(w http.ResponseWriter, r *http.Request) {
 		u := &url.URL{
@@ -54,38 +90,53 @@ func interratoDev(mux *http.ServeMux) {
 	}
 	mux.Handle("interrato.dev/static/", http.FileServer(http.FS(content)))
 
-	for _, page := range []struct {
-		Title        string
-		Description  string
-		Path         string
-		TemplateName string
-	}{
-		{
-			Title:        "Home",
-			Description:  "Computer Engineer, Cybersecurity at the University of Padua.",
-			Path:         "/",
-			TemplateName: "home.html",
-		},
-		{
-			Title:        "CV",
-			Description:  "Simone Ragusa's Curriculum Vitae",
-			Path:         "/cv/",
-			TemplateName: "cv.html",
-		},
-	} {
+	funcs := template.FuncMap{
+		"hasPrefix": strings.HasPrefix,
+	}
+
+	for _, page := range pages {
 		page := page
 		mux.HandleFunc("interrato.dev"+page.Path, func(w http.ResponseWriter, r *http.Request) {
 			if r.URL.Path != page.Path {
 				http.NotFound(w, r)
 				return
 			}
-			tmpl, err := template.ParseFS(content,
-				"templates/base.html", "templates/"+page.TemplateName)
+			tmpl, err := template.New("base.html").Funcs(funcs).ParseFS(
+				content,
+				"templates/base.html",
+				"templates/"+page.TemplateName,
+			)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
 			err = tmpl.Execute(w, page)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+		})
+	}
+
+	for _, note := range notes {
+		note := note
+		note.Path = "/notes/" + note.Slug + "/"
+		mux.HandleFunc("interrato.dev"+note.Path, func(w http.ResponseWriter, r *http.Request) {
+			if r.URL.Path != note.Path {
+				http.NotFound(w, r)
+				return
+			}
+			tmpl, err := template.New("base.html").Funcs(funcs).ParseFS(
+				content,
+				"templates/base.html",
+				"templates/notes/base.html",
+				"templates/notes/"+note.Slug+".html",
+			)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			err = tmpl.Execute(w, note)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
@@ -106,14 +157,4 @@ func interratoDev(mux *http.ServeMux) {
 	mux.Handle("interrato.dev/pigowa/", goGetHandler{
 		Name: "pigowa",
 	})
-
-	// redirects
-	for path, url := range map[string]string{
-		"/resume/": "https://interrato.dev/cv/",
-	} {
-		path, url := path, url
-		mux.HandleFunc("interrato.dev"+path, func(w http.ResponseWriter, r *http.Request) {
-			http.Redirect(w, r, url, http.StatusFound)
-		})
-	}
 }
