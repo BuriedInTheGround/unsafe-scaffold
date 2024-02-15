@@ -25,6 +25,7 @@ func main() {
 				http.Redirect(w, r, u.String(), http.StatusMovedPermanently)
 			}
 			w.Header().Set("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload")
+			w.Header().Set("Cache-Control", "max-age=300, must-revalidate")
 			w.Header().Set("Referrer-Policy", "no-referrer, strict-origin-when-cross-origin")
 			w.Header().Set("X-Content-Type-Options", "nosniff")
 			w.Header().Set("X-Frame-Options", "DENY")
