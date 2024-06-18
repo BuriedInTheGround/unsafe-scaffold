@@ -195,6 +195,54 @@
         @apply dark:border-neutral-500;
     }
 
+    /* Forms */
+    form {
+        @apply mb-4;
+    }
+    input, textarea, select {
+        @apply focus-visible:outline-2;
+        @apply focus-visible:outline-indigo-500;
+        @apply focus-visible:outline;
+        @apply focus-visible:outline-offset-2;
+    }
+    /* All except Checkbox & Radio */
+    form > label {
+        @apply block;
+        @apply mb-3;
+    }
+    input:not([type="checkbox"], [type="radio"]), textarea, select {
+        @apply block;
+        @apply px-2 py-0.5 mt-1;
+        @apply w-80 max-w-full h-8;
+        @apply bg-inherit;
+        @apply border border-black;
+
+        @apply dark:border-neutral-300;
+    }
+    textarea {
+        @apply h-32;
+    }
+    /* Checkbox & Radio */
+    fieldset {
+        @apply block;
+        @apply mb-3;
+    }
+    fieldset > legend {
+        @apply mb-0.5;
+    }
+    fieldset > div > label {
+        @apply flex;
+        @apply items-center;
+    }
+    fieldset > div > label > span { /* The actual label */
+        @apply ml-2;
+    }
+    /* Submit button */
+    button[type="submit"] {
+        @apply cursor-pointer;
+        @apply after:content-['_→'];
+    }
+
     /* Images */
     img {
         @apply p-0.5 lg:mt-1.5;
