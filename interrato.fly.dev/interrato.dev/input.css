@@ -49,19 +49,19 @@
     /* Typography */
     h1 {
         @apply text-lg lg:text-xl;
-        @apply font-bold;
+        @apply font-extrabold;
     }
     h2 {
-        @apply font-bold;
+        @apply font-extrabold;
     }
     h3 {
-        @apply font-semibold;
+        @apply font-bold;
     }
     p, h1, h2, h3, h4, h5, h6 {
         @apply mb-4;
     }
     strong {
-        @apply font-semibold;
+        @apply font-bold;
     }
     small {
         @apply text-sm lg:text-base;
@@ -316,7 +316,7 @@
         @apply border-l-4;
 
         @apply before:px-2 before:py-0.5;
-        @apply before:font-semibold;
+        @apply before:font-bold;
     }
     .safety-danger {
         @apply safety-statement;

@@ -3,7 +3,7 @@ export default {
     content: ['./templates/**/*.html'],
     theme: {
         fontFamily: {
-            sans: ['"Work Sans"', 'ui-sans-serif', 'sans-serif'],
+            sans: ['"Nunito Sans"', 'ui-sans-serif', 'sans-serif'],
             serif: ['"Red Rose"', 'ui-serif', 'serif'],
             mono: ['"Fragment Mono"', 'ui-monospace', 'monospace'],
         },

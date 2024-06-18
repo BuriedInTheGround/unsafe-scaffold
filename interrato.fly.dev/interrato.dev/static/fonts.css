@@ -1,19 +1,27 @@
 @font-face {
-    font-family: "Work Sans";
+    font-family: "Nunito Sans";
     /* font-style: normal; */
-    font-weight: 100 900;
+    font-optical-sizing: auto;
+    font-weight: 200 1000;
+    font-variation-settings:
+        "wdth" 97,  /* from  75 to 125 */
+        "YTLC" 495; /* from 440 to 540 */
     font-display: swap;
-    src: url("fonts/WorkSans-VariableFont_wght.woff2") format("woff2"),
-         url("fonts/WorkSans-VariableFont_wght.ttf") format("truetype");
+    src: url("fonts/NunitoSans-VariableFont_YTLC,opsz,wdth,wght.woff2") format("woff2"),
+         url("fonts/NunitoSans-VariableFont_YTLC,opsz,wdth,wght.ttf") format("truetype");
 }
 
 @font-face {
-    font-family: "Work Sans";
+    font-family: "Nunito Sans";
     font-style: italic;
-    font-weight: 100 900;
+    font-optical-sizing: auto;
+    font-weight: 200 1000;
+    font-variation-settings:
+        "wdth" 97,  /* from  75 to 125 */
+        "YTLC" 495; /* from 440 to 540 */
     font-display: swap;
-    src: url("fonts/WorkSans-Italic-VariableFont_wght.woff2") format("woff2"),
-         url("fonts/WorkSans-Italic-VariableFont_wght.ttf") format("truetype");
+    src: url("fonts/NunitoSans-Italic-VariableFont_YTLC,opsz,wdth,wght.woff2") format("woff2"),
+         url("fonts/NunitoSans-Italic-VariableFont_YTLC,opsz,wdth,wght.ttf") format("truetype");
 }
 
 @font-face {
