@@ -1,0 +1,2 @@
+default:
+    watchexec -c -r "pushd interrato.dev && tailwindcss -m -i input.css -o static/build.css && popd && go run ."
