@@ -54,9 +54,9 @@
         <header>
             <span class="text-site-title">Simone Ragusa</span>
             <nav>
-                <a class='{{ if eq .Path "/" }}link-current{{ else }}text-black{{ end }} px-0.5 mr-4' href="/" rel="noreferrer">Home</a>
-                <a class='{{ if hasPrefix .Path "/notes/" }}link-current{{ else }}text-black{{ end }} px-0.5 mr-4' href="/notes/" rel="noreferrer">Notes</a>
-                <a class='{{ if eq .Path "/resume/" }}link-current{{ else }}text-black{{ end }} px-0.5 mr-4' href="/resume/" rel="noreferrer">Resume</a>
+                <a class='{{ if eq .Path "/" }}link-current{{ else }}text-black dark:text-neutral-200{{ end }} px-0.5 mr-4' href="/" rel="noreferrer">Home</a>
+                <a class='{{ if hasPrefix .Path "/notes/" }}link-current{{ else }}text-black dark:text-neutral-200{{ end }} px-0.5 mr-4' href="/notes/" rel="noreferrer">Notes</a>
+                <a class='{{ if eq .Path "/resume/" }}link-current{{ else }}text-black dark:text-neutral-200{{ end }} px-0.5 mr-4' href="/resume/" rel="noreferrer">Resume</a>
             </nav>
         </header>
 

@@ -10,6 +10,9 @@
         @apply font-sans;
         @apply text-base lg:text-lg;
         @apply antialiased;
+
+        @apply dark:text-neutral-200;
+        @apply dark:bg-neutral-800;
     }
 
     /* First-level layout */
@@ -21,6 +24,8 @@
         @apply flex flex-wrap;
         @apply px-2 py-1 mt-8;
         @apply bg-neutral-200;
+
+        @apply dark:bg-neutral-700;
     }
 
     /* Second-level layout */
@@ -28,6 +33,8 @@
         @apply flex flex-wrap gap-2;
         @apply px-4 py-2;
         @apply bg-neutral-200;
+
+        @apply dark:bg-neutral-700;
     }
     hgroup {
         @apply mb-4;
@@ -35,6 +42,8 @@
     hr {
         @apply my-6;
         @apply border-t-2 border-neutral-200 border-dashed;
+
+        @apply dark:border-neutral-700;
     }
 
     /* Typography */
@@ -58,6 +67,8 @@
         @apply text-sm lg:text-base;
         @apply text-neutral-800;
         @apply leading-snug;
+
+        @apply dark:text-neutral-300;
     }
 
     /* Lists */
@@ -79,6 +90,8 @@
     blockquote {
         @apply pl-4;
         @apply border-l-4 border-neutral-200;
+
+        @apply dark:border-neutral-700;
     }
     blockquote > p {
         @apply pt-px;
@@ -91,6 +104,8 @@
         @apply border-l-4 border-neutral-200;
 
         @apply before:content-['―_'];
+
+        @apply dark:border-neutral-700;
     }
 
     /* Links */
@@ -108,6 +123,8 @@
         @apply focus-visible:outline-indigo-500;
         @apply focus-visible:outline;
         @apply focus-visible:outline-offset-2;
+
+        @apply dark:text-blue-200;
     }
     a[rel~="external"][target="_blank"] {
         @apply whitespace-nowrap;
@@ -121,12 +138,18 @@
         @apply text-sm lg:text-base;
         @apply bg-neutral-200;
         @apply border border-neutral-400;
+
+        @apply dark:bg-neutral-700;
+        @apply dark:border-neutral-500;
     }
     code {
         @apply px-1 py-0.5;
         @apply text-sm lg:text-base;
         @apply bg-neutral-200;
         @apply border border-neutral-300;
+
+        @apply dark:bg-neutral-700;
+        @apply dark:border-neutral-600;
     }
     pre > code {
         @apply p-0;
@@ -140,6 +163,8 @@
         @apply w-full;
         @apply border border-neutral-400;
         @apply border-collapse;
+
+        @apply dark:border-neutral-500;
     }
     caption {
         @apply pt-1;
@@ -148,18 +173,26 @@
     }
     thead {
         @apply bg-neutral-200;
+
+        @apply dark:bg-neutral-700;
     }
     tfoot {
         @apply bg-neutral-200;
+
+        @apply dark:bg-neutral-700;
     }
     th {
         @apply px-1.5;
         @apply text-left;
         @apply border border-neutral-400;
+
+        @apply dark:border-neutral-500;
     }
     td {
         @apply px-1.5;
         @apply border border-neutral-400;
+
+        @apply dark:border-neutral-500;
     }
 
     /* Images */
@@ -167,6 +200,9 @@
         @apply p-0.5 lg:mt-1.5;
         @apply italic;
         @apply border border-neutral-400;
+
+        @apply dark:border-neutral-500;
+        @apply dark:brightness-[.8] dark:contrast-[1.2];
     }
     img + figcaption {
         @apply pt-1;
@@ -259,6 +295,8 @@
 
         @apply before:content-['Caution'];
         @apply before:bg-signal-yellow;
+
+        @apply dark:before:text-neutral-800;
     }
     .safety-notice {
         @apply safety-statement;
@@ -285,35 +323,49 @@
         @apply text-black;
         @apply bg-signal-yellow;
         @apply border-black;
+
+        @apply dark:border-neutral-300;
     }
     .sp-orange {
         @apply text-white;
         @apply bg-signal-orange;
         @apply border-black;
+
+        @apply dark:border-neutral-300;
     }
     .sp-red {
         @apply text-white;
         @apply bg-signal-red;
         @apply border-black;
+
+        @apply dark:border-neutral-300;
     }
     .sp-blue {
         @apply text-white;
         @apply bg-signal-blue;
         @apply border-black;
+
+        @apply dark:border-neutral-300;
     }
     .sp-green {
         @apply text-white;
         @apply bg-signal-green;
         @apply border-black;
+
+        @apply dark:border-neutral-300;
     }
     .sp-white {
         @apply text-black;
         @apply bg-signal-white;
         @apply border-black;
+
+        @apply dark:border-neutral-300;
     }
     .sp-black {
         @apply text-white;
         @apply bg-signal-black;
         @apply border-black;
+
+        @apply dark:border-neutral-300;
     }
 }

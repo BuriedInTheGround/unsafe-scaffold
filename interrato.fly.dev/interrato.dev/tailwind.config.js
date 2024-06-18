@@ -18,7 +18,7 @@ export default {
                     white:  '#ebecea',
                     black:  '#2f3133',
                 },
-            }
+            },
         },
     },
     plugins: [],
