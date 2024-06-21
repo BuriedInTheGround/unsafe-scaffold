@@ -3,11 +3,14 @@ package main
 import (
 	"embed"
 	"html/template"
+	"io"
 	"io/fs"
 	"log"
 	"net/http"
 	"net/url"
 	"strings"
+
+	"filippo.io/age"
 )
 
 //go:embed interrato.dev
@@ -71,7 +74,16 @@ var notes = []struct {
 	Path        string // left empty, constructed later as /notes/{slug}/
 	Slug        string
 	Date        string
-}{}
+	Protected   bool
+}{
+	{
+		Title:       "Taisha-ryū",
+		Description: "Personal notes about Taisha-ryū.",
+		Slug:        "taisha",
+		Date:        "2024-01-15",
+		Protected:   true,
+	},
+}
 
 func interratoDev(mux *http.ServeMux) {
 	mux.HandleFunc("www.interrato.dev/", func(w http.ResponseWriter, r *http.Request) {
@@ -95,7 +107,6 @@ func interratoDev(mux *http.ServeMux) {
 	}
 
 	for _, page := range pages {
-		page := page
 		mux.HandleFunc("interrato.dev"+page.Path, func(w http.ResponseWriter, r *http.Request) {
 			if r.URL.Path != page.Path {
 				http.NotFound(w, r)
@@ -119,19 +130,59 @@ func interratoDev(mux *http.ServeMux) {
 	}
 
 	for _, note := range notes {
-		note := note
 		note.Path = "/notes/" + note.Slug + "/"
 		mux.HandleFunc("interrato.dev"+note.Path, func(w http.ResponseWriter, r *http.Request) {
 			if r.URL.Path != note.Path {
 				http.NotFound(w, r)
 				return
 			}
+			filename := note.Slug
+			if note.Protected {
+				filename = "protected"
+			}
 			tmpl, err := template.New("base.html").Funcs(funcs).ParseFS(
 				content,
 				"templates/base.html",
 				"templates/notes/base.html",
-				"templates/notes/"+note.Slug+".html",
+				"templates/notes/"+filename+".html",
 			)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			err = tmpl.Execute(w, note)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+		})
+		mux.HandleFunc("POST interrato.dev"+note.Path, func(w http.ResponseWriter, r *http.Request) {
+			identity, err := age.NewScryptIdentity(r.PostFormValue("passphrase"))
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			f, err := content.Open("templates/notes/" + note.Slug + ".html.age")
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			out, err := age.Decrypt(f, identity)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			tmpl, err := template.New("base.html").Funcs(funcs).ParseFS(
+				content,
+				"templates/base.html",
+				"templates/notes/base.html",
+			)
+			outBytes, err := io.ReadAll(out)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			tmpl, err = tmpl.Parse(string(outBytes))
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
