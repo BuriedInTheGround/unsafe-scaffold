@@ -5,4 +5,4 @@ default:
     # Generates a proxy HTML file to expose CSS classes to Tailwind
     grep 'class=' ./interrato.dev/templates/notes/{{slug}}.html | perl -pe 's|^.*?<|<|' | perl -pe 's|(class=".*?").*|\1>|' > ./interrato.dev/templates/notes/{{slug}}_proxy.html
     # Encrypts the selected note with a passphrase chosen interactively using age
-    age --passphrase -o ./interrato.dev/templates/notes/{{slug}}.html.age ./interrato.dev/templates/notes/{{slug}}.html
+    go run ./cmd/age-encrypt/age-encrypt.go ./interrato.dev/templates/notes/{{slug}}.html > ./interrato.dev/templates/notes/{{slug}}.html.age

@@ -158,6 +158,7 @@ func interratoDev(mux *http.ServeMux) {
 		})
 		mux.HandleFunc("POST interrato.dev"+note.Path, func(w http.ResponseWriter, r *http.Request) {
 			identity, err := age.NewScryptIdentity(r.PostFormValue("passphrase"))
+			identity.SetMaxWorkFactor(16) // limit memory usage to ~64 MiB
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
