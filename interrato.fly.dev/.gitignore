@@ -1,2 +1,6 @@
-.envrc
+# Local environment direnv files
 .direnv/
+
+# Development helper files (see justfile)
+.state
+local.patch
