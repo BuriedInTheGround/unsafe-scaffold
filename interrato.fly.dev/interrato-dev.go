@@ -77,6 +77,12 @@ var notes = []struct {
 	Protected   bool
 }{
 	{
+		Title:       "Perfectionism slows me down, but it is also useful",
+		Description: "I am going to relearn to make mistakes, but I won't stop striving for perfection because it guides me to produce quality results.",
+		Slug:        "perfectionism",
+		Date:        "2024-07-18",
+	},
+	{
 		Title:       "Taisha-ryū",
 		Description: "Personal notes about Taisha-ryū.",
 		Slug:        "taisha",
