@@ -5,6 +5,8 @@ default: develop
 @list:
     just --list --unsorted
 
+alias help := list
+
 # Rebuild the CSS minimized for prod
 @build:
     pushd interrato.dev > /dev/null && tailwindcss -m -i input.css -o static/build.css && popd > /dev/null
@@ -15,7 +17,7 @@ default: develop
 
 # Create a new note (aka blog post)
 @create-note slug:
-    printf '{{{{ define "content" }}\n{{{{ end }}' > ./interrato.dev/templates/notes/{{slug}}.html
+    printf '{{{{ define "content" }}\n<article>\n</article>\n{{{{ end }}\n\n<!-- vim: set tw=100: -->' > ./interrato.dev/templates/notes/{{slug}}.html
 
 # Rename an existing note
 @rename-note old_slug new_slug:
