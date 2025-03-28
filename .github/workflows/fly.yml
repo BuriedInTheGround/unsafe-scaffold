@@ -15,7 +15,7 @@ jobs:
         with:
           node-version: 20
       - run: |
-          npm install -D tailwindcss
+          npm install -D tailwindcss@3
           cd interrato.fly.dev/interrato.dev
           npx tailwindcss -i input.css -o static/build.css --minify
       - uses: superfly/flyctl-actions/setup-flyctl@master
