@@ -30,26 +30,41 @@ alias help := list
     # Encrypts the selected note with a passphrase chosen interactively using age
     go run ./cmd/age-encrypt/age-encrypt.go ./interrato.dev/templates/notes/{{slug}}.html > ./interrato.dev/templates/notes/{{slug}}.html.age
 
+# Initialize local state management
+init:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    echo 'warning: assuming "remote", please edit .state otherwise'
+    echo -n 'remote' > ./.state
+
 # Change URLs to work in localhost
 local:
     #!/usr/bin/env bash
     set -euo pipefail
+    if [[ ! -e .state ]]; then
+        echo 'error: missing .state file, please run `just init`'
+        exit 1
+    fi
     if [[ "$(cat .state)" == 'local' ]]; then
         echo 'error: already in local state'
         exit 1
     fi
-    echo -n 'local' > ./.state
     # Also creates a .bak backup file in case manual undo is required
     perl -pi.bak -e 's|([(T][" ])interrato.dev|\1|' ./interrato-dev.go
     git diff -- ./interrato-dev.go > ./local.patch
+    echo -n 'local' > ./.state
 
 # Undo changes done by the 'local' recipe
 remote:
     #!/usr/bin/env bash
     set -euo pipefail
+    if [[ ! -e .state ]]; then
+        echo 'error: missing .state file, please run `just init`'
+        exit 1
+    fi
     if [[ "$(cat .state)" == 'remote' ]]; then
         echo 'error: already in remote state'
         exit 1
     fi
-    echo -n 'remote' > ./.state
     git apply -R -v ./local.patch
+    echo -n 'remote' > ./.state
