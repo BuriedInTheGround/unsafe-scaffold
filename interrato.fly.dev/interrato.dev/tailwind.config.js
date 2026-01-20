@@ -5,7 +5,7 @@ export default {
         fontFamily: {
             sans: ['"Nunito Sans"', 'ui-sans-serif', 'sans-serif'],
             serif: ['"Red Rose"', 'ui-serif', 'serif'],
-            mono: ['"Fragment Mono"', 'ui-monospace', 'monospace'],
+            mono: ['"Commit Mono"', 'ui-monospace', 'monospace'],
         },
         extend: {
             colors: {

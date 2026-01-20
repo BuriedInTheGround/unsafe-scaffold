@@ -34,6 +34,17 @@
 }
 
 @font-face {
+    font-family: "Commit Mono";
+    /* font-style: normal; */
+    font-weight: 200 700;
+    font-feature-settings:
+        "ss01", "ss02", "ss03", "ss04", "ss05", "ss06", "cv06", "cv07";
+    font-display: swap;
+    src: url("fonts/CommitMono-VariableFont.woff2") format("woff2"),
+         url("fonts/CommitMono-VariableFont.ttf") format("truetype");
+}
+
+@font-face {
     font-family: "Fragment Mono";
     font-style: normal;
     font-weight: 400;
