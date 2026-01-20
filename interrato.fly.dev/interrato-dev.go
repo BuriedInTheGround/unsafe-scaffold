@@ -58,7 +58,8 @@ var pages = []struct {
 		Title:        "Notes",
 		Description:  "Index of Simone's notes.",
 		Path:         "/notes/",
-		TemplateName: "notes.html", Data: notes,
+		TemplateName: "notes.html",
+		Data:         notes,
 	},
 	{
 		Title:        "Resume",
@@ -184,6 +185,10 @@ func interratoDev(mux *http.ServeMux) {
 				"templates/base.html",
 				"templates/notes/base.html",
 			)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
 			outBytes, err := io.ReadAll(out)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
