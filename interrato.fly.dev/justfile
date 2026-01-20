@@ -30,6 +30,10 @@ alias help := list
     # Encrypts the selected note with a passphrase chosen interactively using age
     go run ./cmd/age-encrypt/age-encrypt.go ./interrato.dev/templates/notes/{{slug}}.html > ./interrato.dev/templates/notes/{{slug}}.html.age
 
+# Unprotect an existing protected note
+@unprotect-note slug:
+    age -d ./interrato.dev/templates/notes/{{slug}}.html.age > ./interrato.dev/templates/notes/{{slug}}.html
+
 # Initialize local state management
 init:
     #!/usr/bin/env bash
