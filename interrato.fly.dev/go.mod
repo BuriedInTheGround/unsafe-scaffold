@@ -1,13 +1,14 @@
 module interrato.dev/unsafe-scaffold/interrato.fly.dev
 
-go 1.22
+go 1.25.5
 
 require (
-	filippo.io/age v1.2.0
-	golang.org/x/term v0.21.0
+	filippo.io/age v1.3.1
+	golang.org/x/term v0.39.0
 )
 
 require (
-	golang.org/x/crypto v0.24.0 // indirect
-	golang.org/x/sys v0.21.0 // indirect
+	filippo.io/hpke v0.4.0 // indirect
+	golang.org/x/crypto v0.45.0 // indirect
+	golang.org/x/sys v0.40.0 // indirect
 )
