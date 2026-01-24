@@ -2,6 +2,7 @@ package main
 
 import (
 	"embed"
+	"fmt"
 	"html/template"
 	"io"
 	"io/fs"
@@ -39,6 +40,20 @@ type goGetHandler struct {
 func (h goGetHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	goGetTmpl.Execute(w, h)
+}
+
+//go:embed apprendimento/*.html
+var apprendimentoContent embed.FS
+
+func apprendimentoHandler(name string) http.Handler {
+	content, err := apprendimentoContent.ReadFile(name)
+	if err != nil {
+		return http.NotFoundHandler()
+	}
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		w.Write(content)
+	})
 }
 
 var pages = []struct {
@@ -108,6 +123,12 @@ func interratoDev(mux *http.ServeMux) {
 		log.Fatal(err)
 	}
 	mux.Handle("interrato.dev/static/", http.FileServer(http.FS(content)))
+
+	mux.Handle("interrato.dev/apprendimento", apprendimentoHandler("apprendimento/index.html"))
+	for i := range 9 {
+		path := fmt.Sprintf("apprendimento/lezione%d", i+1)
+		mux.Handle("interrato.dev/"+path, apprendimentoHandler(path+".html"))
+	}
 
 	funcs := template.FuncMap{
 		"hasPrefix": strings.HasPrefix,
